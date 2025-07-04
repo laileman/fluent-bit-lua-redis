@@ -1,0 +1,27 @@
+services:
+  web-app:
+    build:
+      dockerfile: Dockerfile
+    container_name: web-app
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./log:/var/log/app
+    command: ["--log_file","/var/log/app/app.log"]
+
+  fluent-bit:
+#    image: fluent/fluent-bit:latest-debug
+    build:
+      dockerfile: fluent-bit.Dockerfile
+    container_name: fluent-bit
+    environment:
+      - REDIS_HOST=""
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=""
+      - REDIS_DB=1
+    volumes:
+      - ./fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
+      - ./parsers.conf:/fluent-bit/etc/parsers.conf
+      - ./log:/var/log/app
+      - ./lua:/fluent-bit/etc/lua
+    command: ["/fluent-bit/bin/fluent-bit","-c","/fluent-bit/etc/fluent-bit.conf"]
